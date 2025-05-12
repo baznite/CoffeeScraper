@@ -278,20 +278,27 @@ def validate_email(email):
     return re.match(email_regex, email) is not None
 
 # Read sensitive information from environment variables
-sender_email = os.getenv("SENDER_EMAIL")
-sender_password = os.getenv("SENDER_PASSWORD")
-recipient_email = os.getenv("RECIPIENT_EMAIL")
+sender_email = str(os.getenv("SENDER_EMAIL", ""))
+sender_password = str(os.getenv("SENDER_PASSWORD", ""))
+recipient_email = str(os.getenv("RECIPIENT_EMAIL", ""))
 
 # Validate environment variables
+if not sender_email:
+    logging.error("Environment variable SENDER_EMAIL is missing.")
+    raise ValueError("Environment variable SENDER_EMAIL is missing.")
+if not sender_password:
+    logging.error("Environment variable SENDER_PASSWORD is missing.")
+    raise ValueError("Environment variable SENDER_PASSWORD is missing.")
+if not recipient_email:
+    logging.error("Environment variable RECIPIENT_EMAIL is missing.")
+    raise ValueError("Environment variable RECIPIENT_EMAIL is missing.")
+
 if not validate_email(sender_email):
     logging.error("Invalid sender email format.")
     raise ValueError("Invalid sender email format.")
 if not validate_email(recipient_email):
     logging.error("Invalid recipient email format.")
     raise ValueError("Invalid recipient email format.")
-if not sender_password:
-    logging.error("Sender password is missing.")
-    raise ValueError("Sender password is missing.")
 
 subject_template = "New Offer: {title}"
 body_template = """\
