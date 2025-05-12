@@ -19,7 +19,7 @@ load_dotenv()
 
 # Configure logging to output to the console
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -157,21 +157,30 @@ if initial_row_count != final_row_count:
 else:
     logging.info("No duplicate rows found in the DataFrame.")
 
+logging.debug(f"DataFrame shape after removing duplicates: {df.shape}")
+
 # Apply include and exclude filters
-if include_keywords:
-    include_pattern = '|'.join(include_keywords)
+if include_keywords and any(include_keywords):
+    include_pattern = '|'.join([re.escape(keyword) for keyword in include_keywords if keyword.strip()])
     df = df[
         df['title'].str.contains(include_pattern, case=False, na=False) |
         df['description'].str.contains(include_pattern, case=False, na=False)
     ]
     logging.info(f"Filtered offers to include keywords: {include_keywords}")
-if exclude_keywords:
-    exclude_pattern = '|'.join(exclude_keywords)
+else:
+    logging.info("No include keywords provided. Skipping include filter.")
+
+if exclude_keywords and any(exclude_keywords):
+    exclude_pattern = '|'.join([re.escape(keyword) for keyword in exclude_keywords if keyword.strip()])
     df = df[
         ~df['title'].str.contains(exclude_pattern, case=False, na=False) &
         ~df['description'].str.contains(exclude_pattern, case=False, na=False)
     ]
     logging.info(f"Filtered offers to exclude keywords: {exclude_keywords}")
+else:
+    logging.info("No exclude keywords provided. Skipping exclude filter.")
+
+logging.debug(f"DataFrame shape after applying filters: {df.shape}")
 
 # Timezone conversion and filtering for the last 7 days
 seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
@@ -218,9 +227,9 @@ try:
             logging.info("New offers successfully added to the database.")
             offers_to_send = unique_rows
     else:
-        logging.info("Table 'offers' does not exist. Creating a new table.")
+        logging.info("Table 'offers' does not exist. Creating a new table and inserting data.")
         df.to_sql('offers', conn, if_exists='replace', index=False)
-        logging.info("Database table 'offers' created and data inserted.")
+        logging.info(f"Inserted {len(df)} rows into the new 'offers' table.")
 except sqlite3.Error as e:
     logging.error(f"Database error: {e}")
 except Exception as e:

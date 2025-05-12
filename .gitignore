@@ -14,3 +14,6 @@ __pycache__/
 
 # Exclude virtual environments
 venv/
+
+# Exclude old database backups
+database_old/
