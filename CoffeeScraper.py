@@ -17,9 +17,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Configure logging
+# Configure logging to output to the console
 logging.basicConfig(
-    filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'CoffeeScraper.log'),
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
