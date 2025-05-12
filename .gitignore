@@ -1,0 +1,16 @@
+# Exclude environment variables
+.env
+
+# Exclude configuration files
+config.json
+
+# Exclude log files
+*.log
+
+# Exclude Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Exclude virtual environments
+venv/
