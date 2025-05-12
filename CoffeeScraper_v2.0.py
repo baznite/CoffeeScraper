@@ -26,26 +26,30 @@ logging.basicConfig(
 
 logging.info("Script started.")
 
-# Load configuration from environment variables
+# Load configuration from config.json
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
 try:
-    iterations = int(os.getenv("CONFIG_ITERATIONS", 5))
-    url = os.getenv("CONFIG_URL", "https://www.olx.pl/api/v1/offers/")
-    headers = {
-        "User-Agent": os.getenv("CONFIG_HEADERS_USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    }
-    query_params = {
-        "offset": int(os.getenv("CONFIG_QUERY_PARAMS_OFFSET", 0)),
-        "limit": os.getenv("CONFIG_QUERY_PARAMS_LIMIT", "40"),
-        "category_id": os.getenv("CONFIG_QUERY_PARAMS_CATEGORY_ID", "1776"),
-        "filter_refiners": os.getenv("CONFIG_QUERY_PARAMS_FILTER_REFINERS", "spell_checker"),
-        "sl": os.getenv("CONFIG_QUERY_PARAMS_SL", "19189988bb7x4bc8e1e7")
-    }
-    include_keywords = os.getenv("CONFIG_FILTER_INCLUDE_KEYWORDS", "").split(",")
-    exclude_keywords = os.getenv("CONFIG_FILTER_EXCLUDE_KEYWORDS", "").split(",")
-    logging.info("Configuration loaded successfully from environment variables.")
+    with open(config_path, 'r') as config_file:
+        config = json.load(config_file)
+    iterations = config["iterations"]
+    url = config["url"]
+    headers = config["headers"]
+    query_params = config["query_params"]
+    include_keywords = config["filter"]["include_keywords"]
+    exclude_keywords = config["filter"]["exclude_keywords"]
+    logging.info("Configuration loaded successfully.")
+except FileNotFoundError:
+    logging.error(f"Configuration file not found: {config_path}")
+    raise FileNotFoundError(f"Configuration file not found: {config_path}")
+except json.JSONDecodeError as e:
+    logging.error(f"Error decoding JSON configuration file: {e}")
+    raise ValueError(f"Error decoding JSON configuration file: {e}")
+except KeyError as e:
+    logging.error(f"Missing required configuration key: {e}")
+    raise KeyError(f"Missing required configuration key: {e}")
 except Exception as e:
-    logging.error(f"Error loading configuration from environment variables: {e}")
-    raise
+    logging.error(f"Unexpected error while loading configuration: {e}")
+    raise Exception(f"Unexpected error while loading configuration: {e}")
 
 # Optional text normalization for descriptions
 def normalize(text):

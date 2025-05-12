@@ -1,7 +1,7 @@
 # Coffee Scraper v2.0
 
 ## Overview
-Coffee Scraper v2.0 is a Python application designed to scrape coffee machines offers from www.olx.pl. The application retrieves data through the OLX API, processes the offers, and stores them in a SQLite database. It also provides functionality to send email notifications for new offers and config file for http request and filtering of response offers.
+Coffee Scraper v2.0 is a Python application designed to scrape coffee machines offers from the www.olx.pl platform. The application retrieves data through the OLX API, processes the offers, and stores them in a SQLite database. It also provides functionality to send email notifications for new offers.
 
 ## Features
 - Scrapes offers from the OLX API.
@@ -13,8 +13,7 @@ Coffee Scraper v2.0 is a Python application designed to scrape coffee machines o
 ## Project Structure
 ```
 CoffeeScraper_v2.0
-├── CoffeeScraper.py                # Main script for the Coffee Scraper application
-├── config.json                     # Configuration file for the application
+├── CoffeeScraper_v2.0.py           # Main script for the Coffee Scraper application
 ├── data
 │   └── OLX_coffeeScrape.csv        # CSV backup of the scraped data
 ├── database
@@ -32,39 +31,33 @@ CoffeeScraper_v2.0
    ```
 
 ## Configuration
-1. Create a `config.json` file in the root directory with the following structure:
-   ```json
-   {
-       "iterations": 5,
-       "url": "https://www.olx.pl/api/v1/offers/",
-       "headers": {
-           "User-Agent": ""
-       },
-       "query_params": {
-           "offset": 0,
-           "limit": "40",
-           "category_id": "1776",
-           "filter_refiners": "spell_checker",
-           "sl": "19189988bb7x4bc8e1e7"
-       },
-       "filter": {
-           "include_keywords": ["Ekspres"],
-           "exclude_keywords": ["Uszkodzony", "Zepsuty"]
-       }
-   }
-   ```
-   - `iterations`: Number of API request iterations.
-   - `url`: Base URL for the OLX API.
-   - `headers`: HTTP headers for the API requests.
-   - `query_params`: Query parameters for the API requests.
-   - `filter`: Keywords to include or exclude offers based on the `title` or `description`.
+The application uses environment variables for configuration. Create a `.env` file in the root directory with the following content:
 
-2. Create a `.env` file in the root directory to store sensitive information:
-   ```
-   SENDER_EMAIL=your_email@example.com
-   SENDER_PASSWORD=your_email_password
-   RECIPIENT_EMAIL=recipient_email@example.com
-   ```
+```
+# Email configuration
+SENDER_EMAIL=your_email@example.com
+SENDER_PASSWORD=your_email_password
+RECIPIENT_EMAIL=recipient_email@example.com
+
+# Scraper configuration
+CONFIG_ITERATIONS=5
+CONFIG_URL=https://www.olx.pl/api/v1/offers/
+CONFIG_HEADERS_USER_AGENT=
+CONFIG_QUERY_PARAMS_OFFSET=0
+CONFIG_QUERY_PARAMS_LIMIT=40
+CONFIG_QUERY_PARAMS_CATEGORY_ID=1776
+CONFIG_QUERY_PARAMS_FILTER_REFINERS=spell_checker
+CONFIG_QUERY_PARAMS_SL=19189988bb7x4bc8e1e7
+CONFIG_FILTER_INCLUDE_KEYWORDS=Ekspres
+CONFIG_FILTER_EXCLUDE_KEYWORDS=
+```
+
+- `SENDER_EMAIL`, `SENDER_PASSWORD`, and `RECIPIENT_EMAIL` are used for sending email notifications.
+- `CONFIG_ITERATIONS` specifies the number of API request iterations.
+- `CONFIG_URL` is the base URL for the OLX API.
+- `CONFIG_HEADERS_USER_AGENT` specifies the User-Agent header for API requests.
+- `CONFIG_QUERY_PARAMS_*` defines the query parameters for the API requests.
+- `CONFIG_FILTER_INCLUDE_KEYWORDS` and `CONFIG_FILTER_EXCLUDE_KEYWORDS` define keywords to include or exclude offers based on the `title` or `description`.
 
 ## Usage
 1. Run the main script to start scraping offers:
