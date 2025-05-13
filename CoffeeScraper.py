@@ -299,25 +299,29 @@ def validate_email(email):
 # Read sensitive information from environment variables
 sender_email = str(os.getenv("SENDER_EMAIL", ""))
 sender_password = str(os.getenv("SENDER_PASSWORD", ""))
-recipient_email = str(os.getenv("RECIPIENT_EMAIL", ""))
 
-# Validate environment variables
+# Read and process recipient emails
+recipient_emails = os.getenv("RECIPIENT_EMAIL", "").split(",")  # Split by commas
+recipient_emails = [email.strip() for email in recipient_emails if email.strip()]  # Remove whitespace and empty entries
+
+if not recipient_emails:
+    logging.error("No valid recipient emails provided in RECIPIENT_EMAIL.")
+    raise ValueError("Environment variable RECIPIENT_EMAIL must contain at least one valid email address.")
+
 if not sender_email:
     logging.error("Environment variable SENDER_EMAIL is missing.")
     raise ValueError("Environment variable SENDER_EMAIL is missing.")
 if not sender_password:
     logging.error("Environment variable SENDER_PASSWORD is missing.")
     raise ValueError("Environment variable SENDER_PASSWORD is missing.")
-if not recipient_email:
-    logging.error("Environment variable RECIPIENT_EMAIL is missing.")
-    raise ValueError("Environment variable RECIPIENT_EMAIL is missing.")
 
 if not validate_email(sender_email):
     logging.error("Invalid sender email format.")
     raise ValueError("Invalid sender email format.")
-if not validate_email(recipient_email):
-    logging.error("Invalid recipient email format.")
-    raise ValueError("Invalid recipient email format.")
+for recipient_email in recipient_emails:
+    if not validate_email(recipient_email):
+        logging.error(f"Invalid recipient email format: {recipient_email}")
+        raise ValueError(f"Invalid recipient email format: {recipient_email}")
 
 subject_template = "New Offer: {title}"
 body_template = """\
@@ -435,7 +439,8 @@ send_emails = True
 if not offers_to_send.empty:
     data = offers_to_send.reset_index(drop=True).reset_index()
     try:
-        send_email_for_each_row(sender_email, sender_password, recipient_email, subject_template, body_template, data=data)
+        for recipient_email in recipient_emails:
+            send_email_for_each_row(sender_email, sender_password, recipient_email, subject_template, body_template, data=data)
         logging.info("Emails sent successfully.")
     except Exception as e:
         logging.error(f"Error while sending emails: {e}")
