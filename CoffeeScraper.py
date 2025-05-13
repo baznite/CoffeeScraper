@@ -37,7 +37,8 @@ try:
         "limit": os.getenv("CONFIG_QUERY_PARAMS_LIMIT", "40"),
         "category_id": os.getenv("CONFIG_QUERY_PARAMS_CATEGORY_ID", "1776"),
         "filter_refiners": os.getenv("CONFIG_QUERY_PARAMS_FILTER_REFINERS", "spell_checker"),
-        "sl": os.getenv("CONFIG_QUERY_PARAMS_SL", "19189988bb7x4bc8e1e7")
+        "sl": os.getenv("CONFIG_QUERY_PARAMS_SL", "19189988bb7x4bc8e1e7"),
+        "sort_by": "created_at:desc"
     }
     include_keywords = os.getenv("CONFIG_FILTER_INCLUDE_KEYWORDS", "").split(",")
     exclude_keywords = os.getenv("CONFIG_FILTER_EXCLUDE_KEYWORDS", "").split(",")

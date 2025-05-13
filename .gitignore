@@ -17,3 +17,6 @@ venv/
 
 # Exclude old database backups
 database_old/
+
+# Exclude database tools
+database/database_tools.ipynb
