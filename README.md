@@ -9,6 +9,7 @@ Coffee Scraper v2.0 is a Python application designed to scrape coffee machines o
 - Stores offers in a SQLite database.
 - Sends email notifications for new offers.
 - Generates a CSV backup of the scraped data.
+- Filters offers based on keywords and price.
 
 ## Project Structure
 ```
@@ -45,11 +46,15 @@ CONFIG_URL=https://www.olx.pl/api/v1/offers/
 CONFIG_HEADERS_USER_AGENT=
 CONFIG_QUERY_PARAMS_OFFSET=0
 CONFIG_QUERY_PARAMS_LIMIT=40
-CONFIG_QUERY_PARAMS_CATEGORY_ID=1776
+CONFIG_QUERY_PARAMS_CATEGORY_ID=2225
 CONFIG_QUERY_PARAMS_FILTER_REFINERS=spell_checker
 CONFIG_QUERY_PARAMS_SL=19189988bb7x4bc8e1e7
-CONFIG_FILTER_INCLUDE_KEYWORDS=Ekspres
-CONFIG_FILTER_EXCLUDE_KEYWORDS=
+CONFIG_FILTER_INCLUDE_KEYWORDS=
+CONFIG_FILTER_EXCLUDE_KEYWORDS=Uszkodzony
+CONFIG_MAX_PRICE=500
+
+# Logging configuration
+LOGGING_LEVEL=DEBUG
 ```
 
 - `SENDER_EMAIL`, `SENDER_PASSWORD`, and `RECIPIENT_EMAIL` are used for sending email notifications.
@@ -58,6 +63,8 @@ CONFIG_FILTER_EXCLUDE_KEYWORDS=
 - `CONFIG_HEADERS_USER_AGENT` specifies the User-Agent header for API requests.
 - `CONFIG_QUERY_PARAMS_*` defines the query parameters for the API requests.
 - `CONFIG_FILTER_INCLUDE_KEYWORDS` and `CONFIG_FILTER_EXCLUDE_KEYWORDS` define keywords to include or exclude offers based on the `title` or `description`.
+- `CONFIG_MAX_PRICE` specifies the maximum price for filtering offers.
+- `LOGGING_LEVEL` specifies the logging level for the script. Possible values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`. Default is `DEBUG`.
 
 ## Usage
 1. Run the main script to start scraping offers:

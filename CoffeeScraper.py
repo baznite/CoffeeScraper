@@ -15,11 +15,12 @@ import logging
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(override=True)
 
 # Configure logging to output to the console
+log_level = os.getenv("LOGGING_LEVEL", "DEBUG").upper()  # Read logging level from environment variable
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=getattr(logging, log_level, logging.DEBUG),  # Default to DEBUG if the level is invalid
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -35,13 +36,15 @@ try:
     query_params = {
         "offset": int(os.getenv("CONFIG_QUERY_PARAMS_OFFSET", 0)),
         "limit": os.getenv("CONFIG_QUERY_PARAMS_LIMIT", "40"),
-        "category_id": os.getenv("CONFIG_QUERY_PARAMS_CATEGORY_ID", "1776"),
-        "filter_refiners": os.getenv("CONFIG_QUERY_PARAMS_FILTER_REFINERS", "spell_checker"),
-        "sl": os.getenv("CONFIG_QUERY_PARAMS_SL", "19189988bb7x4bc8e1e7"),
+        "category_id": os.getenv("CONFIG_QUERY_PARAMS_CATEGORY_ID", "2225"),
+        "filter_refiners": os.getenv("CONFIG_QUERY_PARAMS_FILTER_REFINERS"),
+        "sl": os.getenv("CONFIG_QUERY_PARAMS_SL"),
         "sort_by": "created_at:desc"
     }
+    logging.debug(f"Initialized query parameters: {query_params}")  # Log query_params after initialization
     include_keywords = os.getenv("CONFIG_FILTER_INCLUDE_KEYWORDS", "").split(",")
     exclude_keywords = os.getenv("CONFIG_FILTER_EXCLUDE_KEYWORDS", "").split(",")
+    max_price = float(os.getenv("CONFIG_MAX_PRICE", 500))  # Read max price from environment
     logging.info("Configuration loaded successfully from environment variables.")
 except Exception as e:
     logging.error(f"Error loading configuration from environment variables: {e}")
@@ -133,6 +136,7 @@ fail_counter = 0
 while iterations != 0:
     logging.info(f"Starting iteration {begin_iteration - iterations + 1} of {begin_iteration}.")
     query_params["offset"] = iterations * 40  # Update offset dynamically
+    logging.debug(f"Query parameters for this request: {query_params}")  # Log query_params values
     r = requests.request("GET", url, data=payload, headers=headers, params=query_params)
 
     if r.status_code == 200:
@@ -174,14 +178,20 @@ else:
 if exclude_keywords and any(exclude_keywords):
     exclude_pattern = '|'.join([re.escape(keyword) for keyword in exclude_keywords if keyword.strip()])
     df = df[
-        ~df['title'].str.contains(exclude_pattern, case=False, na=False) &
-        ~df['description'].str.contains(exclude_pattern, case=False, na=False)
+        ~(
+            df['title'].str.contains(exclude_pattern, case=False, na=False) |
+            df['description'].str.contains(exclude_pattern, case=False, na=False)
+        )
     ]
     logging.info(f"Filtered offers to exclude keywords: {exclude_keywords}")
 else:
     logging.info("No exclude keywords provided. Skipping exclude filter.")
 
 logging.debug(f"DataFrame shape after applying filters: {df.shape}")
+# Filter out offers with price greater than the configured maximum price
+df['price'] = pd.to_numeric(df['price'], errors='coerce')  # Ensure price is numeric
+df = df[df['price'] <= max_price]
+logging.info(f"Filtered out offers with price greater than {max_price}.")
 
 # Timezone conversion and filtering for the last 7 days
 seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
@@ -433,3 +443,8 @@ else:
     logging.info("No new offers found. No emails were sent.")
 
 logging.info("Script finished.")
+
+# Elektronika/Sprzęt AGD/AGD drobne/Ekspresy do kawy
+# Uszkodzone w tytule/opisie
+# do 500zl
+#
